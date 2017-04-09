@@ -1,0 +1,25 @@
+[{
+    "category": "Security",
+    "scenario": "Compromission of a machine with root access. What could an attacker do from there?"
+},
+{
+    "category": "Availability",
+    "scenario": "Our main CDN provider goes down for undertermined time, all our website images goes blank or timeout"
+},
+{
+    "category": "Availability",
+    "scenario": "Our main resources server has its disk corrupted, no more resources can be served"
+},
+{
+    "category": "Security",
+    "scenario": "DDOS Attack on our front servers, normal trafic is halted. Customers begin to call"
+},
+{
+    "category": "Personel",
+    "scenario": "Bus Factor on one member (Accident or uncapacity to work for period of time) How do we recover / find information?"
+},
+{
+    "category": "Infrastructure",
+    "scenario": "The VPN with our subsidaries goes down for unknown reason. What is the consequences on daily work and how do we cope up with it?"
+}
+]

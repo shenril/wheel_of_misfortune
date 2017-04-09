@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        .arc text {
+            font: 10px sans-serif;
+            text-anchor: middle;
+        }
+
+        .arc path {
+            stroke: #fff;
+        }
+
+        #panel {
+            width: 400px;
+        }
+
+        #panel fieldset {
+            margin: 10px;
+            border: solid 1px #DDD !important;
+            padding: 0 10px 10px 10px;
+            border-bottom: none;
+        }
+
+        #panel legend {
+            width: auto !important;
+            border: none;
+        }
+
+        #content {
+            width: 1000px;
+            display: flex;
+        }
+    </style>
+</head>
+
+<body class="bg-info">
+    <h1 class="text-center text-capitalize">Wheel of Misfortune</h1>
+    <div class="container-fluid">
+        <div id="content" class="row">
+            <svg width="600" height="500"></svg>
+            <div id="panel">
+                <fieldset style="border: 1px black solid">
+                    <legend style="border: 1px black solid;margin-left: 1em; padding: 0.2em 0.8em ">Wheel</legend>
+                    <button type="button" id="stopWheel" class="btn btn-success">Misfortune</button>
+                    <button type="button" id="reload" class="btn btn-danger" onclick="location.reload();">Do again</button>
+                </fieldset>
+                <div id="tooltip" style="opacity:0">
+                    <fieldset style="border: 1px black solid">
+                        <legend style="border: 1px black solid;margin-left: 1em; padding: 0.2em 0.8em ">Description</legend>
+                        <p></p>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        //Set the default text for the button
+        d3.select("#stopWheel").attr("disabled", null);
+        d3.select("#reload").attr("disabled", true);
+        //Set up the svg canvas and rotation
+        var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height"),
+            radius = Math.min(width, height) / 2,
+            g = svg.append("g")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+            .attr("id", "maing"),
+            transform = g.append("animateTransform")
+            .attr("id", "animation")
+            .attr("attributeType", "xml")
+            .attr("attributeName", "transform")
+            .attr("type", "rotate")
+            .attr("from", "0")
+            .attr("to", "360")
+            .attr("additive", "sum")
+            .attr("accumulative", "sum")
+            .attr("fill", "freeze")
+            .attr("dur", "5")
+            .attr("repeatCount", "indefinite");
+
+        // Add the black arrow to point the value
+        d3.select("svg").append("g").attr("transform", "translate(" + (width - (0.05 * width)) + "," + height / 2 + ")").attr("transform", function(d) {
+            return this.getAttribute("transform") +
+                "rotate(90)";
+        }).append("path").attr("id", "arrow").attr("transform", "scale(0.08)").attr("d",
+            "M 680.00001,-27.858649 C 680.00001,-26.000219 330.00773,672.12987 329.42789,671.42805 C 327.4824,669.07328 -20.639627,-28.032809 -19.999107,-28.291219 C -19.580737,-28.459999 59.298143,5.3997002 155.28729,46.952552 L 329.81303,122.50321 L 504.05513,46.965887 C 599.8883,5.4203742 678.68037,-28.571419 679.14863,-28.571419 C 679.61689,-28.571419 680.00001,-28.250669 680.00001,-27.858649 z"
+        );
+
+
+        //Define the color palette for the pie chart
+        var color = d3.scaleOrdinal(["#F15854", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F"]);
+
+        //Set up the pie with the number of division
+        var pie = d3.pie()
+            .sort(null)
+            .value(function(d) {
+                return 100 / Object.keys(d).length;
+            });
+
+        //Define the path for pie piece
+        var path = d3.arc()
+            .outerRadius(radius - 10)
+            .innerRadius(0);
+        //Define the label for pie piece
+        var label = d3.arc()
+            .outerRadius(radius - 40)
+            .innerRadius(radius - 40);
+
+        //Set the pie parts with values from the json file
+        d3.json("data/events.json", function(error, data) {
+            if (error) throw error;
+
+            var arc = g.selectAll(".arc")
+                .data(pie(data))
+                .enter().append("g")
+                .attr("class", "arc");
+
+            //Add the path and description animation for the mouseover
+            arc.append("path")
+                .attr("d", path)
+                .attr("fill", function(d) {
+                    return color(d.data.category);
+                }).on("mouseover", function(d) {
+                    d3.select("#tooltip").transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    d3.select("#tooltip fieldset p").html(d.data.scenario);
+                })
+                .on("mouseout", function(d) {
+                    d3.select("#tooltip").transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });;
+
+            //Add the label on the pie piece
+            arc.append("text")
+                .attr("transform", function(d) {
+                    return "translate(" + label.centroid(d) + ")";
+                })
+                .attr("dy", "0.35em")
+                .text(function(d) {
+                    return d.data.category;
+                });
+        });
+        //Set the action to stop the wheel spinning
+        d3.select("#stopWheel").on('click', function() {
+            d3.select("#stopWheel").attr("disabled", true).html("Stopping...");
+            var duration = d3.select("#animation").attr("dur");
+            var suspens = Math.floor((Math.random() * duration * 1000) + 1);
+            setTimeout(function() {
+                var svgDoc = document.getElementsByTagName('svg');
+                svgDoc[0].pauseAnimations();
+                d3.select("#reload").attr("disabled", null);
+                d3.select("#stopWheel").html("Stopped");
+            }, suspens);
+        });
+    </script>
+</body>
+
+</html>
