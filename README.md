@@ -11,6 +11,9 @@ Open the index.html and spin the wheel !
 
 Once the subject is decided you can brainstorm and detail your plan to deal with the specific problem highlighted
 
+# Screenshot
+![Wheel Screenshot](./screenshot/Wheel.png)
+
 # Contributing
 
 This project intends to be light, easy to use and reuse. Feel free to propose any improvement.
