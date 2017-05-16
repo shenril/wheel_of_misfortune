@@ -1,6 +1,6 @@
 # Wheel of Misfortune
 
-
+@author Batard Florent (http://code-artisan.io)
 I used this project to drive the brainstorming of incident handling in Infra/Security Teams.
 
 You enter your scenario using JSON format in the file data/events.json with the format : 
